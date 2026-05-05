@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Post-Event Survey — WIE × Convert Dinner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2;
+    --ink: #1C1A17;
+    --warm-mid: #8C7B6B;
+    --accent: #C9A96E;
+    --rust: #B85C38;
+    --surface: #F2EDE5;
+    --border: #DDD5C8;
+    --selected-bg: #FDF6ED;
+  }
+  html { font-size: 16px; scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+  .progress-bar { position: fixed; top: 0; left: 0; height: 2px; background: linear-gradient(to right, var(--accent), var(--rust)); transition: width 0.3s; z-index: 100; }
+
+  .header { max-width: 620px; margin: 0 auto; padding: 72px 24px 40px; text-align: center; }
+  .eyebrow { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 18px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .eyebrow::before, .eyebrow::after { content: ''; display: block; width: 32px; height: 1px; background: var(--accent); opacity: 0.5; }
+  .header-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(30px, 6vw, 46px); font-weight: 300; line-height: 1.1; margin-bottom: 14px; }
+  .header-title em { font-style: italic; color: var(--rust); }
+  .header-desc { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 300; color: var(--warm-mid); line-height: 1.7; font-style: italic; }
+
+  .divider { width: 48px; height: 1px; background: linear-gradient(to right, transparent, var(--accent), transparent); margin: 32px auto; }
+
+  .form-wrap { max-width: 620px; margin: 0 auto; padding: 0 24px 80px; }
+
+  .section-label { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); font-weight: 500; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .field-group { margin-bottom: 32px; }
+
+  .question { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 400; color: var(--ink); margin-bottom: 14px; line-height: 1.4; }
+
+  /* STAR RATING */
+  .star-group { display: flex; flex-direction: column; gap: 14px; }
+  .star-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 14px 18px; }
+  .star-label { font-size: 13px; color: var(--ink); font-weight: 400; }
+  .stars { display: flex; gap: 6px; flex-direction: row-reverse; }
+  .stars input { display: none; }
+  .stars label { font-size: 22px; color: var(--border); cursor: pointer; transition: color 0.15s; }
+  .stars label:hover, .stars label:hover ~ label,
+  .stars input:checked ~ label { color: var(--accent); }
+
+  /* SCALE RATING */
+  .scale-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .scale-options { display: flex; gap: 8px; }
+  .scale-option { flex: 1; }
+  .scale-option input { display: none; }
+  .scale-option label {
+    display: flex; align-items: center; justify-content: center;
+    height: 44px; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 2px; font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: all 0.15s; color: var(--warm-mid);
+  }
+  .scale-option input:checked + label { background: var(--selected-bg); border-color: var(--accent); color: var(--ink); }
+  .scale-option label:hover { border-color: var(--accent); }
+  .scale-labels { display: flex; justify-content: space-between; }
+  .scale-labels span { font-size: 10px; color: var(--warm-mid); font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+  /* RADIO CARDS */
+  .radio-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .radio-card { position: relative; }
+  .radio-card input { display: none; }
+  .radio-card label {
+    display: block; background: var(--surface); border: 1.5px solid var(--border);
+    border-radius: 2px; padding: 14px 16px; cursor: pointer;
+    font-size: 14px; color: var(--ink); transition: all 0.15s; line-height: 1.4;
+  }
+  .radio-card input:checked + label { background: var(--selected-bg); border-color: var(--accent); }
+  .radio-card label:hover { border-color: var(--accent); }
+  .radio-card input:checked + label::after { content: ' ✦'; color: var(--accent); font-size: 11px; }
+
+  /* TEXTAREA */
+  textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 2px; padding: 14px 16px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--ink); resize: none; min-height: 100px;
+    line-height: 1.65; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  textarea:focus { border-color: var(--rust); box-shadow: 0 0 0 3px rgba(184,92,56,0.08); background: #fff; }
+  textarea::placeholder { color: #C0B8B0; font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+  /* TEXT INPUT */
+  input[type="text"], input[type="url"] {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 2px; padding: 13px 15px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; color: var(--ink); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input[type="text"]:focus, input[type="url"]:focus { border-color: var(--rust); box-shadow: 0 0 0 3px rgba(184,92,56,0.08); background: #fff; }
+  input::placeholder { color: #C0B8B0; font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+  label.field-label { display: block; font-size: 11px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; color: var(--warm-mid); margin-bottom: 7px; }
+
+  /* CONNECT SECTION */
+  .connect-card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; padding: 24px; }
+  .connect-title { font-family: 'Cormorant Garamond', serif; font-size: 18px; margin-bottom: 6px; }
+  .connect-desc { font-size: 13px; color: var(--warm-mid); line-height: 1.6; margin-bottom: 18px; font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+  /* SUBMIT */
+  .submit-area { margin-top: 40px; text-align: center; }
+  .submit-note { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: var(--warm-mid); font-style: italic; margin-bottom: 22px; line-height: 1.6; }
+  .btn-submit { display: inline-flex; align-items: center; gap: 12px; background: var(--ink); color: var(--cream); border: none; padding: 16px 44px; font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; cursor: pointer; border-radius: 1px; transition: background 0.2s, transform 0.15s; }
+  .btn-submit:hover { background: var(--rust); transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-arrow { transition: transform 0.2s; }
+  .btn-submit:hover .btn-arrow { transform: translateX(4px); }
+
+  /* SUCCESS */
+  .success-state { display: none; text-align: center; padding: 80px 24px; max-width: 480px; margin: 0 auto; }
+  .success-state.visible { display: block; }
+  .success-icon { font-size: 36px; margin-bottom: 24px; color: var(--accent); }
+  .success-title { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 300; margin-bottom: 14px; }
+  .success-body { font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 300; font-style: italic; color: var(--warm-mid); line-height: 1.7; }
+
+  .footer { max-width: 620px; margin: 0 auto; padding: 0 24px 48px; text-align: center; }
+  .footer-logos { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--warm-mid); opacity: 0.5; margin-bottom: 10px; }
+
+  .field-group { opacity: 0; transform: translateY(14px); animation: fadeUp 0.5s ease forwards; }
+  .field-group:nth-child(1) { animation-delay: 0.05s; }
+  .field-group:nth-child(2) { animation-delay: 0.1s; }
+  .field-group:nth-child(3) { animation-delay: 0.15s; }
+  .field-group:nth-child(4) { animation-delay: 0.2s; }
+  .field-group:nth-child(5) { animation-delay: 0.25s; }
+  .field-group:nth-child(6) { animation-delay: 0.3s; }
+  .field-group:nth-child(7) { animation-delay: 0.35s; }
+  .field-group:nth-child(8) { animation-delay: 0.4s; }
+  .field-group:nth-child(9) { animation-delay: 0.45s; }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  @media (max-width: 520px) {
+    .radio-grid { grid-template-columns: 1fr; }
+    .scale-options { gap: 5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header class="header">
+  <div class="eyebrow">WIE × Convert · 5 May 2026</div>
+  <h1 class="header-title">Thank you for<br>an <em>incredible</em> evening</h1>
+  <p class="header-desc">We'd love to hear your thoughts — it takes less than 2 minutes and helps us make future evenings even better.</p>
+</header>
+
+<main id="formSection">
+<div class="form-wrap">
+
+  <div class="section-label">About you</div>
+
+  <div class="field-group">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+      <div>
+        <label class="field-label" for="firstName">First name</label>
+        <input type="text" id="firstName" placeholder="First name" autocomplete="given-name">
+      </div>
+      <div>
+        <label class="field-label" for="lastName">Last name</label>
+        <input type="text" id="lastName" placeholder="Last name" autocomplete="family-name">
+      </div>
+    </div>
+    <label class="field-label" for="email">Email address</label>
+    <input type="text" id="email" placeholder="your@email.com" autocomplete="email">
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">The evening</div>
+
+  <!-- Q1: Overall -->
+  <div class="field-group">
+    <p class="question">How would you rate the evening overall?</p>
+    <div class="star-group">
+      <div class="star-row">
+        <span class="star-label">Overall experience</span>
+        <div class="stars">
+          <input type="radio" name="overall" id="o5" value="5"><label for="o5">★</label>
+          <input type="radio" name="overall" id="o4" value="4"><label for="o4">★</label>
+          <input type="radio" name="overall" id="o3" value="3"><label for="o3">★</label>
+          <input type="radio" name="overall" id="o2" value="2"><label for="o2">★</label>
+          <input type="radio" name="overall" id="o1" value="1"><label for="o1">★</label>
+        </div>
+      </div>
+      <div class="star-row">
+        <span class="star-label">Venue (Browns Covent Garden)</span>
+        <div class="stars">
+          <input type="radio" name="venue" id="v5" value="5"><label for="v5">★</label>
+          <input type="radio" name="venue" id="v4" value="4"><label for="v4">★</label>
+          <input type="radio" name="venue" id="v3" value="3"><label for="v3">★</label>
+          <input type="radio" name="venue" id="v2" value="2"><label for="v2">★</label>
+          <input type="radio" name="venue" id="v1" value="1"><label for="v1">★</label>
+        </div>
+      </div>
+      <div class="star-row">
+        <span class="star-label">Quality of conversation</span>
+        <div class="stars">
+          <input type="radio" name="conversation" id="c5" value="5"><label for="c5">★</label>
+          <input type="radio" name="conversation" id="c4" value="4"><label for="c4">★</label>
+          <input type="radio" name="conversation" id="c3" value="3"><label for="c3">★</label>
+          <input type="radio" name="conversation" id="c2" value="2"><label for="c2">★</label>
+          <input type="radio" name="conversation" id="c1" value="1"><label for="c1">★</label>
+        </div>
+      </div>
+      <div class="star-row">
+        <span class="star-label">Mix of attendees</span>
+        <div class="stars">
+          <input type="radio" name="attendees" id="a5" value="5"><label for="a5">★</label>
+          <input type="radio" name="attendees" id="a4" value="4"><label for="a4">★</label>
+          <input type="radio" name="attendees" id="a3" value="3"><label for="a3">★</label>
+          <input type="radio" name="attendees" id="a2" value="2"><label for="a2">★</label>
+          <input type="radio" name="attendees" id="a1" value="1"><label for="a1">★</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2: Format -->
+  <div class="field-group">
+    <p class="question">How did you find the format of the evening?</p>
+    <div class="radio-grid">
+      <div class="radio-card"><input type="radio" name="format" id="f1" value="Perfect as it was"><label for="f1">Perfect as it was</label></div>
+      <div class="radio-card"><input type="radio" name="format" id="f2" value="Could use more structure"><label for="f2">Could use more structure</label></div>
+      <div class="radio-card"><input type="radio" name="format" id="f3" value="Would prefer less structure"><label for="f3">Would prefer less structure</label></div>
+      <div class="radio-card"><input type="radio" name="format" id="f4" value="A mix of both worked well"><label for="f4">A mix of both worked well</label></div>
+    </div>
+  </div>
+
+  <!-- Q3: Length -->
+  <div class="field-group">
+    <p class="question">How did the length of the evening feel?</p>
+    <div class="radio-grid">
+      <div class="radio-card"><input type="radio" name="length" id="l1" value="Too short"><label for="l1">Too short — I wanted more time</label></div>
+      <div class="radio-card"><input type="radio" name="length" id="l2" value="Just right"><label for="l2">Just right</label></div>
+      <div class="radio-card"><input type="radio" name="length" id="l3" value="Slightly too long"><label for="l3">Slightly too long</label></div>
+      <div class="radio-card"><input type="radio" name="length" id="l4" value="Too long"><label for="l4">Too long</label></div>
+    </div>
+  </div>
+
+  <!-- Q4: NPS -->
+  <div class="field-group">
+    <p class="question">How likely are you to recommend a future WIE dinner to a colleague or friend?</p>
+    <div class="scale-wrap">
+      <div class="scale-options">
+        <div class="scale-option"><input type="radio" name="nps" id="n1" value="1"><label for="n1">1</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n2" value="2"><label for="n2">2</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n3" value="3"><label for="n3">3</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n4" value="4"><label for="n4">4</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n5" value="5"><label for="n5">5</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n6" value="6"><label for="n6">6</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n7" value="7"><label for="n7">7</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n8" value="8"><label for="n8">8</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n9" value="9"><label for="n9">9</label></div>
+        <div class="scale-option"><input type="radio" name="nps" id="n10" value="10"><label for="n10">10</label></div>
+      </div>
+      <div class="scale-labels"><span>Not at all likely</span><span>Extremely likely</span></div>
+    </div>
+  </div>
+
+  <!-- Q5: Highlight -->
+  <div class="field-group">
+    <p class="question">What was the highlight of the evening for you?</p>
+    <textarea id="highlight" placeholder="The moment that stood out most…" rows="4"></textarea>
+  </div>
+
+  <!-- Q6: Improve -->
+  <div class="field-group">
+    <p class="question">What would have made the evening even better?</p>
+    <textarea id="improve" placeholder="Any honest feedback is welcome…" rows="4"></textarea>
+  </div>
+
+  <!-- Q7: Future topics -->
+  <div class="field-group">
+    <p class="question">What topics would you love to explore at a future evening?</p>
+    <textarea id="topics" placeholder="e.g. navigating burnout, building confidence, sponsorship vs mentorship…" rows="3"></textarea>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">Stay connected</div>
+
+  <!-- Q8: LinkedIn -->
+  <div class="field-group">
+    <div class="connect-card">
+      <div class="connect-title">Connect with fellow attendees on LinkedIn</div>
+      <div class="connect-desc">If you'd like us to share your LinkedIn with the other women from the evening, drop your profile URL below. We'll send a roundup to everyone who opts in.</div>
+      <label class="field-label" for="linkedin">Your LinkedIn profile URL (optional)</label>
+      <input type="url" id="linkedin" placeholder="https://linkedin.com/in/yourname">
+    </div>
+  </div>
+
+  <!-- Q9: Slack -->
+  <div class="field-group">
+    <p class="question">Are you already in the Women in Experimentation Slack community?</p>
+    <div class="radio-grid">
+      <div class="radio-card"><input type="radio" name="slack" id="s1" value="Yes"><label for="s1">Yes, I'm already there</label></div>
+      <div class="radio-card"><input type="radio" name="slack" id="s2" value="No - send me the link"><label for="s2">No — send me the link!</label></div>
+      <div class="radio-card"><input type="radio" name="slack" id="s3" value="No - not interested"><label for="s3">No, not for me right now</label></div>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <p class="submit-note">Thank you for taking the time — your feedback means a lot.</p>
+    <button class="btn-submit" onclick="handleSubmit()">
+      Submit feedback <span class="btn-arrow">→</span>
+    </button>
+  </div>
+
+</div>
+</main>
+
+<!-- SUCCESS -->
+<div class="success-state" id="successState">
+  <div class="success-icon">✦</div>
+  <h2 class="success-title">Thank you.</h2>
+  <p class="success-body">
+    Your feedback helps us build something even better next time.<br><br>
+    We hope to see you at the table again soon.
+  </p>
+</div>
+
+<footer class="footer">
+  <div class="footer-logos">Women in Experimentation × Convert</div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrolled = doc.scrollTop || document.body.scrollTop;
+    const total = doc.scrollHeight - doc.clientHeight;
+    document.getElementById('progressBar').style.width = (total > 0 ? (scrolled / total) * 100 : 0) + '%';
+  });
+
+  async function handleSubmit() {
+    const btn = document.querySelector('.btn-submit');
+    btn.innerHTML = 'Submitting&hellip;';
+    btn.disabled = true;
+
+    const getRadio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : 'Not answered'; };
+
+    const data = {
+      'First name': document.getElementById('firstName').value,
+      'Last name': document.getElementById('lastName').value,
+      'Email': document.getElementById('email').value,
+      'Overall experience': getRadio('overall'),
+      'Venue rating': getRadio('venue'),
+      'Conversation rating': getRadio('conversation'),
+      'Attendee mix rating': getRadio('attendees'),
+      'Format': getRadio('format'),
+      'Length': getRadio('length'),
+      'NPS score': getRadio('nps'),
+      'Highlight': document.getElementById('highlight').value || 'Not answered',
+      'Could improve': document.getElementById('improve').value || 'Not answered',
+      'Future topics': document.getElementById('topics').value || 'Not answered',
+      'LinkedIn URL': document.getElementById('linkedin').value || 'Not provided',
+      'WIE Slack': getRadio('slack')
+    };
+
+    try {
+      const res = await fetch('https://formspree.io/f/mwvarkab', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        document.getElementById('formSection').style.display = 'none';
+        const s = document.getElementById('successState');
+        s.classList.add('visible');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        btn.textContent = 'Something went wrong — please try again';
+        btn.disabled = false;
+      }
+    } catch(e) {
+      btn.textContent = 'Something went wrong — please try again';
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>
